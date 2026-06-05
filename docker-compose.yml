@@ -1,0 +1,4 @@
+include:
+  - components/server/docker-compose.yml
+  - components/runner/docker-compose.yml
+  - components/agent/docker-compose.yml

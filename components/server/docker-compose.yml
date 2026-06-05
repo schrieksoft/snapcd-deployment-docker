@@ -1,0 +1,63 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "myPassw0rd"
+      MSSQL_PID: "Express"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssqldata:/var/opt/mssql
+    networks:
+      - snapcd-net
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P "myPassw0rd" -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    networks:
+      - snapcd-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  snapcd-server:
+    image: ghcr.io/schrieksoft/snapcd/snapcd-server:1.3.1
+    container_name: snapcd-server
+    restart: unless-stopped
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Production"
+      ASPNETCORE_URLS: "http://0.0.0.0:8080"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config/appsettings.json:/app/appsettings.json:ro
+      # Optional: layer environment-specific overrides on top of the committed defaults.
+      # Create components/server/config/appsettings.Production.json (gitignored).
+      - ./config/appsettings.Production.json:/app/appsettings.Production.json:ro
+    networks:
+      - snapcd-net
+
+volumes:
+  mssqldata:
+
+networks:
+  snapcd-net:

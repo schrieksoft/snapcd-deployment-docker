@@ -1,0 +1,15 @@
+# Environment-specific overrides — never commit
+**/appsettings.Production.json
+
+# Private SSH key for the Runner — never commit
+components/runner/config/id_rsa
+
+# Editor / OS junk
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# AI assistant scratch directories
+.claude/
+.cursor/
