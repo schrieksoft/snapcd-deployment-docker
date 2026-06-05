@@ -115,7 +115,7 @@ For environment-specific overrides (production secrets, real connection strings)
 
 ## Image versions
 
-Image tags are pinned in each component Compose file (e.g. `ghcr.io/schrieksoft/snapcd/snapcd-server:1.3.0`). A Renovate workflow in `.github/workflows/renovate.yaml` listens for `repository_dispatch: snapcd-released` events from the upstream Snap CD release pipeline and automatically opens PRs to bump these tags in lock-step. Configure the `RENOVATE_TOKEN` repository secret to enable it.
+Image tags are pinned in each component Compose file (e.g. `ghcr.io/schrieksoft/snapcd/snapcd-server:1.3.1`). A Renovate workflow in `.github/workflows/renovate.yaml` listens for `repository_dispatch: snapcd-released` events from the upstream Snap CD release pipeline and automatically opens PRs to bump these tags in lock-step. Configure the `RENOVATE_TOKEN` repository secret to enable it.
 
 ## Licensing
 
