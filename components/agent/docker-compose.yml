@@ -1,6 +1,6 @@
 services:
   snapcd-agent:
-    image: ghcr.io/schrieksoft/snapcd/snapcd-agent:1.4.3
+    image: ghcr.io/schrieksoft/snapcd/snapcd-agent:1.4.4
     container_name: snapcd-agent
     restart: unless-stopped
     depends_on:
