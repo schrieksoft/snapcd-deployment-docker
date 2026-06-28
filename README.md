@@ -96,6 +96,34 @@ Edit `components/agent/config/appsettings.json`:
 
 The Agent ships with a Claude sidecar by default. If your organization is configured to use a different inference provider, edit `components/agent/docker-compose.yml` to swap in the matching sidecar image.
 
+## Executing commands inside containers
+
+Use `docker exec -it <container-name> bash` (or `sh` for Alpine-based images) to get a shell inside a running container.
+
+```bash
+# Shell into the Runner (e.g. to run az login, install tools, debug)
+docker exec -it snapcd-runner bash
+
+# Shell into the Server
+docker exec -it snapcd-server bash
+
+# Shell into the Agent
+docker exec -it snapcd-agent bash
+
+# Shell into SQL Server (e.g. to run sqlcmd)
+docker exec -it sqlserver bash
+
+# Shell into Redis (Alpine — use sh)
+docker exec -it redis sh
+```
+
+This is useful for tasks like authenticating cloud CLIs on the Runner:
+
+```bash
+docker exec -it snapcd-runner bash
+az login
+```
+
 ## Mixing and matching
 
 The component Compose files don't depend on each other; they only share a network name. You can:
