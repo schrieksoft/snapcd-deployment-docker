@@ -45,9 +45,9 @@ services:
         condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: "Production"
-      ASPNETCORE_URLS: "http://0.0.0.0:8080"
+      ASPNETCORE_URLS: "http://0.0.0.0:5000"
     ports:
-      - "8080:8080"
+      - "5000:5000"
     volumes:
       - ./config/appsettings.json:/app/appsettings.json:ro
       # Optional: layer environment-specific overrides on top of the committed defaults.
