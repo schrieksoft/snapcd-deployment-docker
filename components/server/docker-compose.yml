@@ -35,7 +35,7 @@ services:
       retries: 10
 
   snapcd-server:
-    image: ghcr.io/schrieksoft/snapcd/snapcd-server:1.5.1
+    image: ghcr.io/schrieksoft/snapcd/snapcd-server:1.5.2
     container_name: snapcd-server
     restart: unless-stopped
     depends_on:
