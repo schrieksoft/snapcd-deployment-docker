@@ -45,7 +45,7 @@ docker compose up -d
 docker compose logs -f snapcd-server
 ```
 
-The Server's Dashboard is available at <http://localhost:8080>. The default Self-Hosted organization is pre-seeded; you sign in as:
+The Server's Dashboard is available at <http://localhost:5000>. The default Self-Hosted organization is pre-seeded; you sign in as:
 
 - **Email:** `admin@preseeded.io`
 - **Password:** `Admin#123`

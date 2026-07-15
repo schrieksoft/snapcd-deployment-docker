@@ -19,7 +19,7 @@ services:
     restart: unless-stopped
     environment:
       # The sidecar reaches Snap CD Server for MCP via the same hostname the agent uses.
-      SNAPCD_SERVER_URL: "http://snapcd-server:8080"
+      SNAPCD_SERVER_URL: "http://snapcd-server:5000"
       # Provide the Anthropic API key for the Claude SDK. Leave empty to use a BYOK credential
       # configured on the Agent resource (the sidecar will fetch it from the server at mission time).
       ANTHROPIC_API_KEY: ""
