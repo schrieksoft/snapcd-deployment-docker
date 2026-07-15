@@ -1,6 +1,6 @@
 services:
   snapcd-agent:
-    image: ghcr.io/schrieksoft/snapcd/snapcd-agent:1.8.2
+    image: ghcr.io/schrieksoft/snapcd/snapcd-agent:1.8.3
     container_name: snapcd-agent
     restart: unless-stopped
     depends_on:
@@ -14,7 +14,7 @@ services:
       - snapcd-net
 
   snapcd-agent-sidecar-claude:
-    image: ghcr.io/schrieksoft/snapcd/snapcd-agent-sidecar-claude:1.8.2
+    image: ghcr.io/schrieksoft/snapcd/snapcd-agent-sidecar-claude:1.8.3
     container_name: snapcd-agent-sidecar-claude
     restart: unless-stopped
     environment:
