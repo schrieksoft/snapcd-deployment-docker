@@ -13,3 +13,6 @@ components/runner/config/id_rsa
 # AI assistant scratch directories
 .claude/
 .cursor/
+
+# Sidecar credentials for docker compose — never commit
+.env

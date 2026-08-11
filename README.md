@@ -18,6 +18,7 @@ Each component is a self-contained Compose file under `components/`. The root `d
 ```
 snapcd-deployment-docker/
 ├── docker-compose.yml             # Root shim — includes all three components
+├── .env                            # Claude sidecar credentials (gitignored — see below)
 ├── components/
 │   ├── server/
 │   │   ├── docker-compose.yml     # SQL Server + Redis + Snap CD Server
@@ -31,6 +32,7 @@ snapcd-deployment-docker/
 │   │       └── preapproved-hooks/
 │   └── agent/
 │       ├── docker-compose.yml     # Snap CD Agent + Claude sidecar
+│       ├── .env                   # Sidecar credentials, if run standalone (gitignored)
 │       └── config/appsettings.json
 ├── renovate.json                   # Auto-PR new Snap CD image versions
 └── .github/workflows/renovate.yaml
@@ -95,6 +97,25 @@ Edit `components/agent/config/appsettings.json`:
 - Set `Agent.AgentId`, `Agent.OrganizationId` and `Agent.ClientId` / `Agent.ClientSecret` to the values shown when you registered the Agent.
 
 The Agent ships with a Claude sidecar by default. If your organization is configured to use a different inference provider, edit `components/agent/docker-compose.yml` to swap in the matching sidecar image.
+
+#### Claude sidecar credentials
+
+If you wish to make use of the Agent component, you must provide it with credentials for Claude Code. The sidecar needs exactly one Anthropic credential, supplied in a `.env` file (gitignored). Compose reads `.env` from the directory of the Compose file you invoke, so put it beside the one you use — `.env` at the repo root for the full-stack `docker compose up -d`, or `components/agent/.env` when bringing the Agent up on its own:
+
+```
+# A Claude subscription token…
+CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-…
+# …or an Anthropic API key instead. Set one, not both.
+ANTHROPIC_API_KEY=sk-ant-api03-…
+# Optional: a GitHub PAT, used by the sidecar's git/gh for the AutoFix path.
+GITHUB_TOKEN=ghp_…
+```
+
+Exporting the variables in your shell before `docker compose up -d` works equally well.
+
+The sidecar starts successfully with neither set — it only fails when a mission actually calls for inference, so a healthy container is not evidence that the credential landed. Check with `docker compose exec snapcd-agent-sidecar-claude env | grep -c 'ANTHROPIC_API_KEY=.\|CLAUDE_CODE_OAUTH_TOKEN=.'` — that should print `1`.
+
+The sidecar reaches the Server for MCP via `SNAPCD_BASE_URL` (set in the Compose file, `/mcp` is appended). It refuses to start if that variable is missing, which surfaces as the orchestrator failing to connect on port 7001.
 
 ## Executing commands inside containers
 
