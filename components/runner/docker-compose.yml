@@ -1,7 +1,6 @@
 services:
   snapcd-runner:
     image: ghcr.io/schrieksoft/snapcd/snapcd-runner-azure:1.12.8
-    container_name: snapcd-runner
     restart: unless-stopped
     entrypoint: ["./SnapCd.Runner", "--urls", "http://0.0.0.0:5001"]
     volumes:
@@ -10,7 +9,8 @@ services:
       # Create components/runner/config/appsettings.Production.json (gitignored).
       - ./config/appsettings.Production.json:/app/appsettings.Production.json:ro
 
-      - ~/.snapcd/runner-data:/app/runnerdata
+      # Must be unique per compose project when running several instances side by side.
+      - ${RUNNER_DATA_DIR:-~/.snapcd/runner-data}:/app/runnerdata
       # - runner-data:/app/runnerdata # use this instead if you want to use a virtualized volume
 
       # Pre-approved hooks directory (optional)

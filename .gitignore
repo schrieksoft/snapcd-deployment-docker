@@ -16,3 +16,4 @@ components/runner/config/id_rsa
 
 # Sidecar credentials for docker compose — never commit
 .env
+.env*

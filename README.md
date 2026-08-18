@@ -38,7 +38,7 @@ snapcd-deployment-docker/
 └── .github/workflows/renovate.yaml
 ```
 
-All component Compose files attach to a shared external bridge network called `snapcd-net`, so when you bring up multiple components together they reach each other by service name (`snapcd-server`, `snapcd-runner`, `snapcd-agent`, `snapcd-agent-sidecar-claude`, `sqlserver`, `redis`).
+All component Compose files declare the same network name (`snapcd-net`), so when they come up together under one project — as the root `include` shim does — they share a single bridge network and reach each other by service name (`snapcd-server`, `snapcd-runner`, `snapcd-agent`, `snapcd-agent-sidecar-claude`, `sqlserver`, `redis`).
 
 ## Bringing up the full stack
 
@@ -55,6 +55,43 @@ The Server's Dashboard is available at <http://localhost:5000>. The default Self
 > Change this password before you put the deployment in front of anything that matters.
 
 The Runner registers automatically using the `default` Service Principal that the Server pre-seeds on first start. The Agent registers using the `defaultAgent` Service Principal. Neither needs any additional setup for the all-in-one deploy to work.
+
+## Running two stacks side by side
+
+Compose namespaces containers, networks and named volumes by project name, so two full stacks coexist on one box as long as each gets its own project name, host ports and Runner data directory. All of these are settable through an env file:
+
+```
+# .env.blue
+COMPOSE_PROJECT_NAME=snapcd-blue
+SNAPCD_SERVER_PORT=5000
+SQLSERVER_PORT=1433
+RUNNER_DATA_DIR=~/.snapcd/blue/runner-data
+CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-…
+```
+
+```
+# .env.green — same shape, different values
+COMPOSE_PROJECT_NAME=snapcd-green
+SNAPCD_SERVER_PORT=5100
+SQLSERVER_PORT=1533
+RUNNER_DATA_DIR=~/.snapcd/green/runner-data
+CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-…
+```
+
+```bash
+docker compose --env-file .env.blue up -d
+docker compose --env-file .env.green up -d
+```
+
+`--env-file` feeds both variable substitution and the project name, so every command aimed at a specific stack carries the same flag — e.g. `docker compose --env-file .env.green logs -f snapcd-server` or `docker compose --env-file .env.blue down`.
+
+Every variable has a default matching the single-stack values, so a plain `docker compose up -d` with the standard `.env` continues to work unchanged. The variables:
+
+| Variable              | Default                  | What it controls                                              |
+|-----------------------|--------------------------|---------------------------------------------------------------|
+| `SNAPCD_SERVER_PORT`  | `5000`                   | Host port for the Server (Dashboard at `http://localhost:<port>`; also fed to the Server as `Server__Host`) |
+| `SQLSERVER_PORT`      | `1433`                   | Host port for SQL Server                                      |
+| `RUNNER_DATA_DIR`     | `~/.snapcd/runner-data`  | Host directory bind-mounted as the Runner's working directory |
 
 ## Bringing up a single component
 
@@ -119,29 +156,29 @@ The sidecar reaches the Server for MCP via `SNAPCD_BASE_URL` (set in the Compose
 
 ## Executing commands inside containers
 
-Use `docker exec -it <container-name> bash` (or `sh` for Alpine-based images) to get a shell inside a running container.
+Use `docker compose exec <service-name> bash` (or `sh` for Alpine-based images) to get a shell inside a running container. Container names are generated from the project name, so address containers by service name.
 
 ```bash
 # Shell into the Runner (e.g. to run az login, install tools, debug)
-docker exec -it snapcd-runner bash
+docker compose exec snapcd-runner bash
 
 # Shell into the Server
-docker exec -it snapcd-server bash
+docker compose exec snapcd-server bash
 
 # Shell into the Agent
-docker exec -it snapcd-agent bash
+docker compose exec snapcd-agent bash
 
 # Shell into SQL Server (e.g. to run sqlcmd)
-docker exec -it sqlserver bash
+docker compose exec sqlserver bash
 
 # Shell into Redis (Alpine — use sh)
-docker exec -it redis sh
+docker compose exec redis sh
 ```
 
 This is useful for tasks like authenticating cloud CLIs on the Runner:
 
 ```bash
-docker exec -it snapcd-runner bash
+docker compose exec snapcd-runner bash
 az login
 ```
 
@@ -149,7 +186,7 @@ az login
 
 The component Compose files don't depend on each other; they only share a network name. You can:
 - Spread components across multiple machines (each running its own component Compose).
-- Run two Agents on the same box for different organizations — copy `components/agent/` to `components/agent-org-b/` and edit the container names / config paths.
+- Run two Agents on the same box for different organizations — copy `components/agent/` to `components/agent-org-b/` and edit the config, or bring the same Compose file up twice under different project names (see [Running two stacks side by side](#running-two-stacks-side-by-side)).
 - Run the Server on one box and Runners on many — each Runner gets its own deploy of `components/runner/`.
 
 ## Configuration

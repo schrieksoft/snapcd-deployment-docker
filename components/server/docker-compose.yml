@@ -1,14 +1,13 @@
 services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: sqlserver
     restart: unless-stopped
     environment:
       ACCEPT_EULA: "Y"
       SA_PASSWORD: "myPassw0rd"
       MSSQL_PID: "Express"
     ports:
-      - "1433:1433"
+      - "${SQLSERVER_PORT:-1433}:1433"
     volumes:
       - mssqldata:/var/opt/mssql
     networks:
@@ -24,7 +23,6 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: redis
     restart: unless-stopped
     networks:
       - snapcd-net
@@ -36,7 +34,6 @@ services:
 
   snapcd-server:
     image: ghcr.io/schrieksoft/snapcd/snapcd-server:1.12.8
-    container_name: snapcd-server
     restart: unless-stopped
     depends_on:
       sqlserver:
@@ -46,8 +43,10 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: "Production"
       ASPNETCORE_URLS: "http://0.0.0.0:5000"
+      # Env vars override appsettings.json; the externally reachable host follows the published port.
+      Server__Host: "http://localhost:${SNAPCD_SERVER_PORT:-5000}"
     ports:
-      - "5000:5000"
+      - "${SNAPCD_SERVER_PORT:-5000}:5000"
     volumes:
       - ./config/appsettings.json:/app/appsettings.json:ro
       # Optional: layer environment-specific overrides on top of the committed defaults.
