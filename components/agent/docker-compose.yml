@@ -1,6 +1,6 @@
 services:
   snapcd-agent:
-    image: ghcr.io/schrieksoft/snapcd/snapcd-agent:1.12.8
+    image: ghcr.io/schrieksoft/snapcd/snapcd-agent:1.12.9
     restart: unless-stopped
     depends_on:
       - snapcd-agent-sidecar-claude
@@ -13,7 +13,7 @@ services:
       - snapcd-net
 
   snapcd-agent-sidecar-claude:
-    image: ghcr.io/schrieksoft/snapcd/snapcd-agent-sidecar-claude:1.12.8
+    image: ghcr.io/schrieksoft/snapcd/snapcd-agent-sidecar-claude:1.12.9
     restart: unless-stopped
     environment:
       # The sidecar reaches Snap CD Server for MCP via the same hostname the agent uses.
