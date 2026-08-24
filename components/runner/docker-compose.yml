@@ -26,6 +26,18 @@ services:
     networks:
       - snapcd-net
 
+  # Forwards two ports on the Runner's own localhost: 5000 to the Server, and
+  # 9000 to the host machine, so URLs like http://localhost:5000 work identically
+  # on the host and inside the Runner (e.g. a state store served from the host).
+  runner-loopback:
+    image: alpine/socat
+    restart: unless-stopped
+    network_mode: "service:snapcd-runner"
+    depends_on:
+      - snapcd-runner
+    entrypoint: ["sh", "-c",
+      "socat TCP6-LISTEN:5000,fork,reuseaddr,ipv6only=0 TCP:snapcd-server:5000 & exec socat TCP6-LISTEN:9000,fork,reuseaddr,ipv6only=0 TCP:$(ip route | awk '/default/{print $3; exit}'):9000"]
+
 volumes:
   runner-data:
 
