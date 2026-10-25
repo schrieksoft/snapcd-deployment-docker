@@ -6,8 +6,9 @@ services:
     volumes:
       - ./config/appsettings.json:/app/appsettings.json:ro
       # Optional: layer environment-specific overrides on top of the committed defaults.
-      # Create components/runner/config/appsettings.Production.json (gitignored).
-      - ./config/appsettings.Production.json:/app/appsettings.Production.json:ro
+      # Create components/runner/config/appsettings.Production.json (gitignored), then
+      # uncomment. Leave it commented if you have no overrides.
+      # - ./config/appsettings.Production.json:/app/appsettings.Production.json:ro
 
       # Must be unique per compose project when running several instances side by side.
       - ${RUNNER_DATA_DIR:-~/.snapcd/runner-data}:/app/runnerdata

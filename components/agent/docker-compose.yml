@@ -7,8 +7,9 @@ services:
     volumes:
       - ./config/appsettings.json:/app/appsettings.json:ro
       # Optional: layer environment-specific overrides on top of the committed defaults.
-      # Create components/agent/config/appsettings.Production.json (gitignored).
-      - ./config/appsettings.Production.json:/app/appsettings.Production.json:ro
+      # Create components/agent/config/appsettings.Production.json (gitignored), then
+      # uncomment. Leave it commented if you have no overrides.
+      # - ./config/appsettings.Production.json:/app/appsettings.Production.json:ro
     networks:
       - snapcd-net
 

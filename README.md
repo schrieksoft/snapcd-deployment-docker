@@ -110,7 +110,7 @@ Edit `components/server/config/appsettings.json` to:
 - Configure your real OpenID Connect signing keys (`OpenIdConnect.TokenSigning.RsaPrivateKey` / `RsaPublicKey`) — see [docs/server settings](https://docs.snapcd.io/components/server/#settings).
 - Set up an `EmailSender` so users can self-serve password resets and invitations.
 - Configure `OpenIdConnect.ExternalLoginProviders` if you want SSO sign-in.
-- Layer environment-specific overrides into `components/server/config/appsettings.Production.json` (gitignored) — secrets, connection strings, etc.
+- Layer environment-specific overrides into `components/server/config/appsettings.Production.json` (gitignored) — secrets, connection strings, etc. Its mount is commented out in `components/server/docker-compose.yml`, so uncomment that line once the file exists.
 
 ### Runner (only) — pointed at Snap CD Cloud
 
@@ -198,7 +198,9 @@ Per-component settings live next to each component:
 - `components/runner/config/appsettings.json` — Runner settings ([docs](https://docs.snapcd.io/components/runner/#settings))
 - `components/agent/config/appsettings.json` — Agent settings ([docs](https://docs.snapcd.io/components/agent/#settings))
 
-For environment-specific overrides (production secrets, real connection strings), drop an `appsettings.Production.json` next to the base `appsettings.json`. The `.gitignore` excludes these so you can keep production credentials out of source control.
+For environment-specific overrides (production secrets, real connection strings), drop an `appsettings.Production.json` next to the base `appsettings.json` and uncomment its mount in that component's `docker-compose.yml`. The `.gitignore` excludes these so you can keep production credentials out of source control.
+
+The mounts ship commented out because Docker creates a *directory* in place of a missing bind-mount source. A clone with no overrides would otherwise start with a directory where the file should be, and the app would silently read no overrides.
 
 ## Image versions
 
