@@ -2,7 +2,7 @@ services:
   snapcd-runner:
     image: ghcr.io/schrieksoft/snapcd/snapcd-runner-azure:1.14.12
     restart: unless-stopped
-    entrypoint: ["./SnapCd.Runner", "--urls", "http://0.0.0.0:5001"]
+    entrypoint: ["/app/entrypoint.sh", "--urls", "http://0.0.0.0:5001"]
     volumes:
       - ./config/appsettings.json:/app/appsettings.json:ro
       # Optional: layer environment-specific overrides on top of the committed defaults.
@@ -16,9 +16,13 @@ services:
       # Pre-approved hooks directory (optional)
       - ./config/preapproved-hooks:/app/preapproved-hooks:ro
 
-      # SSH keys for private Git repositories (optional)
-      - ./config/known_hosts:/root/.ssh/known_hosts:ro
-      - ./config/id_rsa:/root/.ssh/id_rsa:ro
+      # Stages the SSH key into ~/.ssh at 0600 before the Runner starts.
+      - ./config/entrypoint.sh:/app/entrypoint.sh:ro
+
+      # SSH keys for private Git repositories (optional). Staged rather than mounted
+      # onto ~/.ssh, because a bind mount keeps the host's permissions.
+      - ./config/known_hosts:/run/secrets/ssh/known_hosts:ro
+      - ./config/id_rsa:/run/secrets/ssh/id_rsa:ro
 
       # Terraform/OpenTofu binaries from host (pick one or both, edit path as needed)
       - /usr/local/bin/terraform:/usr/local/bin/terraform:ro
