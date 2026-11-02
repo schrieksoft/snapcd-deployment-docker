@@ -13,11 +13,22 @@ Each component is a self-contained Compose file under `components/`. The root `d
 
 > Each component Compose file is fully self-contained. You can copy a single `components/<name>/` directory out into its own repo if you'd rather not keep the other components around.
 
+### Running locally built images
+
+To try a change to the images before any version is released, build them tagged `:local` and layer `docker-compose.local.yml` over the root file:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.local.yml up -d
+```
+
+It is not picked up automatically, so an ordinary `docker compose up -d` still runs the released tags.
+
 ## What lives where
 
 ```
 snapcd-deployment-docker/
-├── docker-compose.yml             # Root shim — includes all three components
+├── docker-compose.yml             # Root shim - includes all three components
+├── docker-compose.local.yml       # Optional: run locally built images instead of released ones
 ├── .env                            # Claude sidecar credentials (gitignored — see below)
 ├── components/
 │   ├── server/

@@ -1,0 +1,20 @@
+# Points the four Snap CD services at locally built images, for testing a change to them before
+# any version is released. Not picked up automatically: pass it explicitly after the root file.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.local.yml up -d
+#
+# Build the images first, tagging them :local. From the snapcd checkout, publish each project and
+# build its Dockerfile; the Runner's image expects tools/ and the application in separate
+# directories, as the release workflow stages them.
+services:
+  snapcd-server:
+    image: ghcr.io/schrieksoft/snapcd/snapcd-server:local
+
+  snapcd-runner:
+    image: ghcr.io/schrieksoft/snapcd/snapcd-runner-azure:local
+
+  snapcd-agent:
+    image: ghcr.io/schrieksoft/snapcd/snapcd-agent:local
+
+  snapcd-agent-sidecar-claude:
+    image: ghcr.io/schrieksoft/snapcd/snapcd-agent-sidecar-claude:local
