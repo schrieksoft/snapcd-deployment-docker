@@ -1,6 +1,6 @@
 services:
   snapcd-agent:
-    image: ghcr.io/schrieksoft/snapcd/snapcd-agent:1.15.10
+    image: ghcr.io/schrieksoft/snapcd/snapcd-agent:1.15.11
     restart: unless-stopped
     read_only: true
     tmpfs:
@@ -30,7 +30,7 @@ services:
       - snapcd-net
 
   snapcd-agent-sidecar-claude:
-    image: ghcr.io/schrieksoft/snapcd/snapcd-agent-sidecar-claude:1.15.10
+    image: ghcr.io/schrieksoft/snapcd/snapcd-agent-sidecar-claude:1.15.11
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
