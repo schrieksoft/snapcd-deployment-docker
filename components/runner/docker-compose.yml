@@ -1,8 +1,31 @@
 services:
+  # Copies the SSH key into a volume owned by the Runner's non-root user. A bind-mounted key
+  # keeps its host ownership, which the Runner's uid does not match, so it cannot read it
+  # directly. Runs as root to read the key, exits before the Runner starts, and has no network.
+  ssh-key-stage:
+    image: alpine:3.22
+    user: "0:0"
+    network_mode: none
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        install -d -m 700 -o 1654 -g 1654 /staged
+        [ -f /src/id_rsa ] && install -m 600 -o 1654 -g 1654 /src/id_rsa /staged/id_rsa
+        [ -f /src/known_hosts ] && install -m 644 -o 1654 -g 1654 /src/known_hosts /staged/known_hosts
+        exit 0
+    volumes:
+      - ./config:/src:ro
+      - runner-ssh:/staged
+
   snapcd-runner:
     image: ghcr.io/schrieksoft/snapcd/snapcd-runner-azure:1.15.10
     restart: unless-stopped
-    entrypoint: ["/app/entrypoint.sh", "--urls", "http://0.0.0.0:5001"]
+    command: ["--urls", "http://0.0.0.0:5001"]
+    depends_on:
+      ssh-key-stage:
+        condition: service_completed_successfully
     volumes:
       - ./config/appsettings.json:/app/appsettings.json:ro
       # Optional: layer environment-specific overrides on top of the committed defaults.
@@ -20,13 +43,9 @@ services:
       # Pre-approved hooks directory (optional)
       - ./config/preapproved-hooks:/app/preapproved-hooks:ro
 
-      # Stages the SSH key into ~/.ssh at 0600 before the Runner starts.
-      - ./config/entrypoint.sh:/app/entrypoint.sh:ro
-
-      # SSH keys for private Git repositories (optional). Staged rather than mounted
-      # onto ~/.ssh, because a bind mount keeps the host's permissions.
-      - ./config/known_hosts:/run/secrets/ssh/known_hosts:ro
-      - ./config/id_rsa:/run/secrets/ssh/id_rsa:ro
+      # SSH keys for private Git repositories (optional), staged by ssh-key-stage above.
+      # Put id_rsa and known_hosts in components/runner/config/ at any permissions you like.
+      - runner-ssh:/home/app/.ssh
 
       # Terraform/OpenTofu binaries from host (pick one or both, edit path as needed)
       - /usr/local/bin/terraform:/usr/local/bin/terraform:ro
@@ -48,6 +67,7 @@ services:
 
 volumes:
   runner-data:
+  runner-ssh:
 
 networks:
   snapcd-net:
