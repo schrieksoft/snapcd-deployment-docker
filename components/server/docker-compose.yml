@@ -2,6 +2,23 @@ services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4G
+        reservations:
+          cpus: "0.5"
+          memory: 2G
     environment:
       ACCEPT_EULA: "Y"
       SA_PASSWORD: "myPassw0rd"
@@ -24,6 +41,22 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    user: "999:1000"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.05"
+          memory: 64M
     networks:
       - snapcd-net
     healthcheck:
@@ -35,6 +68,22 @@ services:
   snapcd-server:
     image: ghcr.io/schrieksoft/snapcd/snapcd-server:1.15.10
     restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /home/app:uid=1654,gid=1654,mode=0700
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+        reservations:
+          cpus: "0.25"
+          memory: 512M
     depends_on:
       sqlserver:
         condition: service_healthy

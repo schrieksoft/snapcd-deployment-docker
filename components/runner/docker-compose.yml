@@ -6,6 +6,15 @@ services:
     image: alpine:3.22
     user: "0:0"
     network_mode: none
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
     command:
       - /bin/sh
       - -c
@@ -22,6 +31,22 @@ services:
   snapcd-runner:
     image: ghcr.io/schrieksoft/snapcd/snapcd-runner-azure:1.15.10
     restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /home/app:uid=1654,gid=1654,mode=0700
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4G
+        reservations:
+          cpus: "0.25"
+          memory: 512M
     command: ["--urls", "http://0.0.0.0:5001"]
     depends_on:
       ssh-key-stage:
@@ -60,6 +85,11 @@ services:
     image: alpine/socat
     restart: unless-stopped
     network_mode: "service:snapcd-runner"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     depends_on:
       - snapcd-runner
     entrypoint: ["sh", "-c",
