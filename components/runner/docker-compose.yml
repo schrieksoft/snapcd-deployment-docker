@@ -11,8 +11,11 @@ services:
       # - ./config/appsettings.Production.json:/app/appsettings.Production.json:ro
 
       # Must be unique per compose project when running several instances side by side.
-      - ${RUNNER_DATA_DIR:-~/.snapcd/runner-data}:/app/runnerdata
-      # - runner-data:/app/runnerdata # use this instead if you want to use a virtualized volume
+      # A named volume is initialised from the image, so it is owned by the Runner's
+      # non-root user. A host directory keeps its own ownership and must be chowned to
+      # 1654:1654 first; uncomment the bind mount below if you need one.
+      - runner-data:/app/runnerdata
+      # - ${RUNNER_DATA_DIR:-~/.snapcd/runner-data}:/app/runnerdata
 
       # Pre-approved hooks directory (optional)
       - ./config/preapproved-hooks:/app/preapproved-hooks:ro
