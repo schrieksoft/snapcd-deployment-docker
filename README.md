@@ -186,12 +186,19 @@ docker compose exec sqlserver bash
 docker compose exec redis sh
 ```
 
-This is useful for tasks like authenticating cloud CLIs on the Runner:
+### Signing the Runner in to Azure
+
+The Runner image ships the Azure CLI, and the `azurerm` provider can use its login. Bring the stack up and sign the Runner in, in one go:
 
 ```bash
-docker compose exec snapcd-runner bash
-az login
+docker compose up -d && docker compose exec snapcd-runner sh -c 'az config set core.login_experience_v2=off && az login && az account set --subscription <subscription-id>'
 ```
+
+`az login` prints a URL and a code; open the URL in a browser on any machine and enter the code. Turning off `core.login_experience_v2` skips the interactive subscription picker, since `az account set` chooses the subscription.
+
+The Dashboard is still on <http://localhost:5000>. For a second stack, add the same `--env-file` to both commands, e.g. `docker compose --env-file .env.green up -d && docker compose --env-file .env.green exec snapcd-runner sh -c '…'`.
+
+The Runner's home directory is a `tmpfs`, so the login does not survive a restart of the Runner container. Run the `exec` part again after one.
 
 ## Mixing and matching
 
